@@ -1,5 +1,7 @@
 # StoryScan
 
+> **Fork di [unknowncall/storyscan](https://github.com/unknowncall/storyscan)** per il HomeLab di danibett: aggiunge l'icona dell'app e gli aggiornamenti di sicurezza. Immagine: `ghcr.io/danibett/storyscan:main`, pubblicata dalla pipeline a ogni push su `main`.
+
 A beautiful, modern web-based disk usage visualizer designed for Unraid and other systems. Inspired by DaisyDisk, StoryScan provides an elegant interface to explore and understand your disk usage with interactive treemap visualizations.
 
 ## Features
