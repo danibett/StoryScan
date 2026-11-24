@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSnapshots } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('API /api/history/snapshots');
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,8 +34,9 @@ export async function GET(request: NextRequest) {
     const snapshots = getSnapshots(pathIds, range);
     return NextResponse.json({ snapshots });
   } catch (error) {
+    logger.error('Request failed:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch snapshots', details: (error as Error).message },
+      { error: 'Failed to fetch snapshots' },
       { status: 500 }
     );
   }

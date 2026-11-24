@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -15,11 +15,12 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the Next.js app
-RUN npm run build
+# Build the Next.js app, then drop the dev dependencies (Jest, Playwright, ESLint...) so
+# they do not end up in the runtime image (smaller, fewer packages to keep patched)
+RUN npm run build && npm prune --omit=dev
 
 # Production stage
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 

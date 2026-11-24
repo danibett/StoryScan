@@ -26,9 +26,19 @@ export function getTreemapConfig() {
   };
 }
 
-export async function scanDirectory(dirPath: string): Promise<FileNode> {
-  const stats = await fs.stat(dirPath);
+/**
+ * Recursively scans a directory. Symbolic links below the root are listed but never
+ * followed (lstat): following them could loop forever (a link to a parent folder),
+ * leave the scanned tree (a link to "/") or count the same files twice. They count 0 bytes.
+ * The root itself may be a link (a configured directory), so it is resolved with stat.
+ */
+export async function scanDirectory(dirPath: string, isRoot = true): Promise<FileNode> {
+  const stats = isRoot ? await fs.stat(dirPath) : await fs.lstat(dirPath);
   const name = path.basename(dirPath);
+
+  if (stats.isSymbolicLink()) {
+    return { name, path: dirPath, size: 0, type: 'file', modifiedTime: stats.mtimeMs };
+  }
 
   if (stats.isFile()) {
     return {
@@ -52,7 +62,7 @@ export async function scanDirectory(dirPath: string): Promise<FileNode> {
         const fullPath = path.join(dirPath, entry.name);
 
         try {
-          const childNode = await scanDirectory(fullPath);
+          const childNode = await scanDirectory(fullPath, false);
           children.push(childNode);
           totalSize += childNode.size;
         } catch (err) {

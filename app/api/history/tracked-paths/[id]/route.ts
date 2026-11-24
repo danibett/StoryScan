@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateTrackedPath, deleteTrackedPath } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('API /api/history/tracked-paths/[id]');
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -18,8 +21,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     updateTrackedPath(numericId, updates);
     return NextResponse.json({ success: true });
   } catch (error) {
+    logger.error('Request failed:', error);
     return NextResponse.json(
-      { error: 'Failed to update tracked path', details: (error as Error).message },
+      { error: 'Failed to update tracked path' },
       { status: 500 }
     );
   }
@@ -39,8 +43,9 @@ export async function DELETE(
     deleteTrackedPath(numericId);
     return NextResponse.json({ success: true });
   } catch (error) {
+    logger.error('Request failed:', error);
     return NextResponse.json(
-      { error: 'Failed to delete tracked path', details: (error as Error).message },
+      { error: 'Failed to delete tracked path' },
       { status: 500 }
     );
   }

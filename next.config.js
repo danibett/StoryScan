@@ -1,26 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // The app uses no next/image: turning the optimizer off removes /_next/image and the
+  // DoS fixed upstream in 14.2.7 (CVE-2024-47831) until Next.js itself is updated.
+  images: { unoptimized: true },
   experimental: {
     serverComponentsExternalPackages: ['better-sqlite3'],
   },
-  // Allow accessing the API from any origin (for Docker networking)
-  async headers() {
-    return [
-      {
-        source: '/api/:path*',
-        headers: [
-          { key: 'Access-Control-Allow-Credentials', value: 'true' },
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,OPTIONS' },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'X-Requested-With, Content-Type, Authorization',
-          },
-        ],
-      },
-    ];
-  },
+  // No CORS headers: the UI and the API share one origin. "Access-Control-Allow-Origin: *"
+  // let any website opened on the LAN read the whole scanned file tree from /api/scan.
 };
 
 module.exports = nextConfig;

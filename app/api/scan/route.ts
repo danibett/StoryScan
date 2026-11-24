@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     logger.info(`Response time: ${Date.now() - startTime}ms`);
     logger.groupEnd();
     return NextResponse.json(
-      { error: 'Failed to scan directory', details: (error as Error).message },
+      { error: 'Failed to scan directory' },
       { status: 500 }
     );
   }

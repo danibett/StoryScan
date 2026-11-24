@@ -139,6 +139,34 @@ describe('scanDirectory', () => {
     expect(typeof result.modifiedTime).toBe('number');
   });
 
+  it('lists symlinks without following them (no loops, no double counting)', async () => {
+    const linkDir = await fs.mkdtemp(path.join(os.tmpdir(), 'scanner-links-'));
+    try {
+      await fs.writeFile(path.join(linkDir, 'real.txt'), 'hello world'); // 11 bytes
+      await fs.symlink(path.join(linkDir, 'real.txt'), path.join(linkDir, 'copy.txt'));
+      await fs.symlink(linkDir, path.join(linkDir, 'loop')); // points to its own parent
+      const result = await scanDirectory(linkDir);
+      expect(result.size).toBe(11); // the file once, links count 0 bytes
+      const loop = result.children!.find((c) => c.name === 'loop');
+      expect(loop).toMatchObject({ type: 'file', size: 0 });
+      expect(loop!.children).toBeUndefined();
+    } finally {
+      await fs.rm(linkDir, { recursive: true, force: true });
+    }
+  });
+
+  it('still resolves a root that is itself a symlink', async () => {
+    const linkRoot = path.join(os.tmpdir(), `scanner-root-link-${process.pid}`);
+    await fs.symlink(tmpDir, linkRoot);
+    try {
+      const result = await scanDirectory(linkRoot);
+      expect(result.type).toBe('directory');
+      expect(result.size).toBe(26);
+    } finally {
+      await fs.unlink(linkRoot);
+    }
+  });
+
   it('handles nested directories', async () => {
     const result = await scanDirectory(tmpDir);
     const subdir = result.children!.find((c) => c.name === 'subdir');

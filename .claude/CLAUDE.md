@@ -1127,6 +1127,13 @@ make help               # Show all commands
 - **Current Progress: 11/17 features (65%)**
 - See FEATURE_ROADMAP.md for details
 - **Recent Changes:**
+  - **Review hardening (fork danibett/storyscan, 2026-11-24):**
+    - Removed `Access-Control-Allow-Origin: *` on `/api/*` (any LAN website could read the scanned file tree)
+    - Scanner does not follow symlinks below the root (`lstat`): no loops, no leaving the tree, no double counting; links count 0 bytes (2 new tests)
+    - API 500 responses no longer return `error.message` (paths); the detail goes to the server log
+    - `images.unoptimized: true` (no next/image in use) closes the image optimizer DoS (CVE-2024-47831) until Next.js is updated
+    - Docker: `node:22-alpine` (Node 20 is EOL) and `npm prune --omit=dev` after the build
+    - CI: Node 22, `actions/checkout@v5`, `actions/setup-node@v5`, `codecov-action@v5`; pre-release job disabled on the fork
   - **App icon & installable web app (fork danibett/storyscan, 2026-11-24):**
     - Graphic icon (white treemap blocks on the blue primary gradient) replaces the missing favicon
     - Next.js file conventions: `app/icon.svg` (tab icon), `app/apple-icon.png` (180×180), `app/favicon.ico`
