@@ -1,6 +1,6 @@
 # StoryScan - Claude Context
 
-**Last Updated:** 2026-02-06
+**Last Updated:** 2026-11-24
 **Version:** 1.8.0 (Phase 1, 2, 4-partial Complete + Historical Tracking + Server-Side Cron Scheduler)
 **Status:** Active Development - High Quality Codebase with Server-Side Auto-Scanning
 
@@ -1127,6 +1127,11 @@ make help               # Show all commands
 - **Current Progress: 11/17 features (65%)**
 - See FEATURE_ROADMAP.md for details
 - **Recent Changes:**
+  - **App icon & installable web app (fork danibett/storyscan, 2026-11-24):**
+    - Graphic icon (white treemap blocks on the blue primary gradient) replaces the missing favicon
+    - Next.js file conventions: `app/icon.svg` (tab icon), `app/apple-icon.png` (180×180), `app/favicon.ico`
+    - `app/manifest.ts` + PNG icons in `public/` (192, 512, maskable 512): Android installs the app with its logo
+    - Tests: `__tests__/app/manifest.test.ts` (manifest shape, icons exist and are PNG)
   - **Historical Scan Tracking (Session 7)** - Full persistence layer for tracking directory sizes over time:
     - **New Infrastructure:** SQLite database via `better-sqlite3`, auto-initializes with WAL mode
     - **Database:** `lib/db.ts` - Singleton connection, CRUD for tracked paths + history snapshots
