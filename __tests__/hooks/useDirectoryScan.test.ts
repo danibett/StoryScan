@@ -6,6 +6,8 @@ global.fetch = jest.fn();
 describe('useDirectoryScan', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Also drop queued mockResolvedValueOnce values a test did not consume
+    (global.fetch as jest.Mock).mockReset();
     jest.useFakeTimers();
   });
 
@@ -37,10 +39,6 @@ describe('useDirectoryScan', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({ directories: mockDirectories }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScanResult,
       });
 
     const { result } = renderHook(() => useDirectoryScan());
