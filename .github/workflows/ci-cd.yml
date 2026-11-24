@@ -20,7 +20,7 @@ jobs:
   # Combined quality checks job - runs lint and typecheck in parallel
   quality:
     name: Code Quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -45,7 +45,7 @@ jobs:
   # Single test job that runs both unit and E2E tests with coverage
   test:
     name: Tests & Coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -95,7 +95,7 @@ jobs:
   # Build Docker image once and use caching
   build-docker:
     name: Build Docker Image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [quality, test]
     if: github.event_name == 'push'
 
@@ -152,7 +152,7 @@ jobs:
   # Tag existing Docker image for pre-release (no rebuild)
   create-prerelease:
     name: Create Pre-Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-docker]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
@@ -239,7 +239,7 @@ jobs:
   # Tag existing Docker image for production (no rebuild)
   create-production-release:
     name: Create Production Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [quality, test]
     if: startsWith(github.ref, 'refs/tags/v')
 
