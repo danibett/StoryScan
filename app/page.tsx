@@ -15,6 +15,7 @@ import Header from '@/components/Header';
 import MainContent from '@/components/MainContent';
 import ComparisonView from '@/components/ComparisonView';
 import Sidebar from '@/components/Sidebar';
+import ScanPrompt from '@/components/ScanPrompt';
 import { Card, CardContent } from '@/components/ui/card';
 
 function HomeContent() {
@@ -36,6 +37,7 @@ function HomeContent() {
     lastScanTime,
     currentNode,
     navigationPath,
+    startScan,
     handleDirectorySelect,
     handleRefresh,
     handleNodeClick,
@@ -186,13 +188,7 @@ function HomeContent() {
         ) : currentNode && scanResult ? (
           <MainContent />
         ) : (
-          !error && (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <p className="text-muted-foreground">Select a directory to start scanning</p>
-              </CardContent>
-            </Card>
-          )
+          <ScanPrompt directory={selectedDirectory} onStart={startScan} />
         )}
       </main>
 

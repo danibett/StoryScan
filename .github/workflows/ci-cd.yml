@@ -42,6 +42,11 @@ jobs:
       - name: Check TypeScript
         run: npx tsc --noEmit
 
+      # Same production build the Docker image runs, so a broken build shows up on the PR
+      # and not only after the merge
+      - name: Build
+        run: npm run build
+
   # Single test job that runs both unit and E2E tests with coverage
   test:
     name: Tests & Coverage
