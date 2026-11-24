@@ -25,16 +25,19 @@ interface AppStateContextType {
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  // Use system preference for initial dark mode state
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return true; // Default to dark for SSR
-  });
+  // Same first value on server and client (dark), otherwise hydration fails: the server
+  // renders the moon icon, a light-mode browser the sun, and React rebuilds the whole page.
+  // The system preference is applied right after mount.
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('treemap');
   const [autoRefreshInterval, setAutoRefreshInterval] = useState<number>(0);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+  }, []);
 
   // Apply dark mode class to document
   useEffect(() => {

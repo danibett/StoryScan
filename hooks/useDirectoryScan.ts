@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { DirectoryConfig, ScanResult } from '@/types';
 import { createLogger } from '@/lib/logger';
 
@@ -11,6 +11,10 @@ interface UseDirectoryScanReturn {
   lastScanTime: Date | null;
   loadDirectories: () => Promise<void>;
   scanDirectory: (dir: DirectoryConfig) => Promise<void>;
+  /** True once the user has started a scan in this session */
+  hasScanned: boolean;
+  /** Starts the scan of the selected directory (the app never scans on its own on open) */
+  startScan: () => void;
   handleDirectorySelect: (dir: DirectoryConfig) => void;
   handleRefresh: () => void;
 }
@@ -25,6 +29,10 @@ export function useDirectoryScan(autoRefreshInterval: number = 0): UseDirectoryS
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastScanTime, setLastScanTime] = useState<Date | null>(null);
+  // Opening the app only lists the directories: the first scan is started by the user.
+  // After that, picking another directory scans it right away (that is a user action too).
+  const [hasScanned, setHasScanned] = useState(false);
+  const hasScannedRef = useRef(false);
 
   const loadDirectories = useCallback(async () => {
     logger.group('Loading directories...');
@@ -42,9 +50,8 @@ export function useDirectoryScan(autoRefreshInterval: number = 0): UseDirectoryS
       if (data.directories) {
         setDirectories(data.directories);
         if (data.directories.length > 0) {
-          logger.info(`Auto-selecting first directory: ${data.directories[0].name}`);
+          logger.info(`Selected ${data.directories[0].name}, waiting for the user to start the scan`);
           setSelectedDirectory(data.directories[0]);
-          scanDirectory(data.directories[0]);
         }
       }
       logger.groupEnd();
@@ -56,6 +63,8 @@ export function useDirectoryScan(autoRefreshInterval: number = 0): UseDirectoryS
   }, []);
 
   const scanDirectory = useCallback(async (dir: DirectoryConfig) => {
+    hasScannedRef.current = true;
+    setHasScanned(true);
     logger.group('Scanning directory...');
     logger.info(`Directory: ${dir.name} (ID: ${dir.id})`);
     logger.info(`Path: ${dir.path}`);
@@ -107,10 +116,23 @@ export function useDirectoryScan(autoRefreshInterval: number = 0): UseDirectoryS
     (dir: DirectoryConfig) => {
       logger.info(`👆 User selected directory: ${dir.name} (ID: ${dir.id})`);
       setSelectedDirectory(dir);
-      scanDirectory(dir);
+      if (hasScannedRef.current) {
+        scanDirectory(dir);
+      } else {
+        // Nothing scanned yet: keep waiting for the user's "Start scan"
+        setScanResult(null);
+        setError(null);
+      }
     },
     [scanDirectory]
   );
+
+  const startScan = useCallback(() => {
+    if (selectedDirectory) {
+      logger.info(`▶️ User started scan for: ${selectedDirectory.name}`);
+      scanDirectory(selectedDirectory);
+    }
+  }, [selectedDirectory, scanDirectory]);
 
   const handleRefresh = useCallback(() => {
     if (selectedDirectory) {
@@ -126,7 +148,8 @@ export function useDirectoryScan(autoRefreshInterval: number = 0): UseDirectoryS
 
   // Auto-refresh effect
   useEffect(() => {
-    if (autoRefreshInterval === 0 || !selectedDirectory) return;
+    // Auto-refresh only repeats a scan the user already started
+    if (autoRefreshInterval === 0 || !selectedDirectory || !hasScanned) return;
 
     logger.info(`⏰ Auto-refresh enabled: ${autoRefreshInterval}ms interval`);
 
@@ -139,7 +162,7 @@ export function useDirectoryScan(autoRefreshInterval: number = 0): UseDirectoryS
       logger.info(`⏰ Auto-refresh disabled`);
       clearInterval(intervalId);
     };
-  }, [autoRefreshInterval, selectedDirectory, scanDirectory]);
+  }, [autoRefreshInterval, selectedDirectory, hasScanned, scanDirectory]);
 
   return {
     directories,
@@ -150,6 +173,8 @@ export function useDirectoryScan(autoRefreshInterval: number = 0): UseDirectoryS
     lastScanTime,
     loadDirectories,
     scanDirectory,
+    hasScanned,
+    startScan,
     handleDirectorySelect,
     handleRefresh,
   };

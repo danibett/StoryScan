@@ -15,6 +15,8 @@ interface ScanContextType {
   lastScanTime: Date | null;
   currentNode: FileNode | null;
   navigationPath: string[];
+  hasScanned: boolean;
+  startScan: () => void;
   handleDirectorySelect: (dir: DirectoryConfig) => void;
   handleRefresh: () => void;
   handleNodeClick: (node: FileNode) => void;
@@ -33,6 +35,8 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     isLoading,
     error,
     lastScanTime,
+    hasScanned,
+    startScan,
     handleDirectorySelect,
     handleRefresh,
   } = useDirectoryScan(autoRefreshInterval);
@@ -49,6 +53,8 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     lastScanTime,
     currentNode,
     navigationPath,
+    hasScanned,
+    startScan,
     handleDirectorySelect,
     handleRefresh,
     handleNodeClick,

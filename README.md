@@ -132,7 +132,7 @@ npm start
 
 ## Technology Stack
 
-- **Next.js 14**: React framework with App Router
+- **Next.js 16**: React framework with App Router
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first styling
 - **D3.js**: Powerful treemap visualizations

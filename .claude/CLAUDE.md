@@ -171,7 +171,7 @@ StoryScan is a **beautiful web-based disk usage visualizer** for Unraid servers,
 
 ### Frontend
 
-- **Framework:** Next.js 14.2.3 (App Router)
+- **Framework:** Next.js 16 (App Router; React 18 still supported but deprecated, React 19 is the next step)
 - **Language:** TypeScript 5.4.5
 - **UI Library:** shadcn/ui (Radix UI primitives)
   - Components: Button, Card, Input, Select, Separator, Dropdown Menu, Dialog, Checkbox, Badge, Label, Toggle, Toggle Group, Sheet, Sonner (Toast)
@@ -851,7 +851,7 @@ Access at: `http://unraid-server-ip:3000`
 ### Current Limitations
 
 1. No user authentication (single-user app)
-2. No background scanning (scan on-demand only)
+2. The UI never scans on open: the user starts the first scan (scheduled history snapshots run server-side)
 3. Limited to configured directories via ENV
 4. No file operations (view-only)
 
@@ -1009,7 +1009,7 @@ If dark mode toggle isn't working:
 
 ### Documentation
 
-- Next.js 14 Docs: https://nextjs.org/docs
+- Next.js Docs: https://nextjs.org/docs
 - shadcn/ui: https://ui.shadcn.com
 - D3.js: https://d3js.org
 - Tailwind CSS: https://tailwindcss.com
@@ -1127,6 +1127,13 @@ make help               # Show all commands
 - **Current Progress: 11/17 features (65%)**
 - See FEATURE_ROADMAP.md for details
 - **Recent Changes:**
+  - **Next.js 16 + manual first scan (fork danibett/storyscan, 2026-11-24):**
+    - Next.js 14.2.3 → 16.4.6 (Dependabot #17 lockfile): `serverExternalPackages` replaces `experimental.serverComponentsExternalPackages`
+    - `next lint` no longer exists: `npm run lint` is `eslint . --ext .js,.jsx,.ts,.tsx` (+ `.eslintignore`)
+    - Hydration fix: `AppStateContext` starts dark on server and client, the system preference is applied after mount (the mismatch made React rebuild the page and broke the E2E tests)
+    - Manual first scan: opening the app only lists and selects the directories; `ScanPrompt` (Start scan) starts the first scan; after that, picking another directory scans it; auto-refresh only repeats a started scan. `useDirectoryScan` exposes `hasScanned` + `startScan`
+    - CI: production `npm run build` in the Code Quality job; Docker runner now copies `next.config.js` (next start reads it at runtime)
+    - Tests: ScanPrompt (3), useDirectoryScan (2 new + updated), AppStateContext (1), E2E start the scan with the button
   - **Review hardening (fork danibett/storyscan, 2026-11-24):**
     - Removed `Access-Control-Allow-Origin: *` on `/api/*` (any LAN website could read the scanned file tree)
     - Scanner does not follow symlinks below the root (`lstat`): no loops, no leaving the tree, no double counting; links count 0 bytes (2 new tests)

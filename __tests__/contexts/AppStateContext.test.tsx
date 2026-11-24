@@ -16,6 +16,24 @@ describe('AppStateContext', () => {
     expect(result.current.autoRefreshInterval).toBe(0);
   });
 
+  it('starts dark on server and client, then follows a light system preference', () => {
+    const original = window.matchMedia;
+    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    })) as unknown as typeof window.matchMedia;
+    try {
+      const { result } = renderHook(() => useAppState(), { wrapper });
+      // After mount the effect has applied the system preference (light)
+      expect(result.current.isDarkMode).toBe(false);
+      expect(document.documentElement.classList.contains('dark')).toBe(false);
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+
   it('updates dark mode', () => {
     const { result } = renderHook(() => useAppState(), { wrapper });
 
