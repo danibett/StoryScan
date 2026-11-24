@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error('Failed to record snapshots:', error);
     return NextResponse.json(
-      { error: 'Failed to record snapshots', details: (error as Error).message },
+      { error: 'Failed to record snapshots' },
       { status: 500 }
     );
   }
